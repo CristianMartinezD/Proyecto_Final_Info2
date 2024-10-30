@@ -1,0 +1,56 @@
+<diagram program="umletino" version="15.1"><zoom_level>10</zoom_level><element><id>UMLClass</id><coordinates><x>560</x><y>30</y><w>210</w><h>100</h></coordinates><panel_attributes>Personaje
+--
+-nombre:string
+-salud:unsigned short
+--
++mover():void
++interactuar():void</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>560</x><y>180</y><w>210</w><h>100</h></coordinates><panel_attributes>Homer
+--
+-nivel_hambre:unsigned short
+-energia:unsigned short
+--
++resolver_acertijo():bool
++conducir():void</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>600</x><y>120</y><w>30</w><h>80</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>10;10;10;60</additional_attributes></element><element><id>UMLClass</id><coordinates><x>230</x><y>250</y><w>210</w><h>110</h></coordinates><panel_attributes>Vehiculo
+--
+-estado_dano:unsigned short
+-velocidad:float
+-modelo:string
+--
++acelerar():void
++colisionar():bool</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>430</x><y>250</y><w>150</w><h>40</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;-
+ 1                      1</panel_attributes><additional_attributes>130;20;10;20</additional_attributes></element><element><id>UMLClass</id><coordinates><x>560</x><y>340</y><w>210</w><h>100</h></coordinates><panel_attributes>Laberinto
+--
+-matriz:int[][]
+-punto_salida:int[]
+--
++generar_caminos():void
++detectar_salida():bool</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>640</x><y>270</y><w>40</w><h>90</h></coordinates><panel_attributes>1
+
+1</panel_attributes><additional_attributes>10;10;10;70</additional_attributes></element><element><id>UMLClass</id><coordinates><x>240</x><y>430</y><w>210</w><h>100</h></coordinates><panel_attributes>Obstaculos
+--
+-tipo:string
+-posicion:int[]
+--
++activar():void
++esquivar():bool</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>290</x><y>350</y><w>50</w><h>100</h></coordinates><panel_attributes>1
+
+
+1..*</panel_attributes><additional_attributes>10;10;10;80</additional_attributes></element><element><id>UMLClass</id><coordinates><x>220</x><y>80</y><w>210</w><h>90</h></coordinates><panel_attributes>PersecucionArea
+--
+-tiempo_para_bomba:int
+--
++lanzar_bomba():void
++disparar_proyectil():void</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>250</x><y>160</y><w>40</w><h>110</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;-
+ 1 
+
+
+
+  1</panel_attributes><additional_attributes>10;90;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>560</x><y>500</y><w>210</w><h>90</h></coordinates><panel_attributes>Item
+--
+-tipoDeItem:string
+-efecto:string
+--
++usar():void</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>580</x><y>430</y><w>60</w><h>90</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
+  1
+
+  0..*</panel_attributes><additional_attributes>10;10;10;70</additional_attributes></element></diagram>
