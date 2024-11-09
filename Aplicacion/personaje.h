@@ -8,9 +8,10 @@ class Personaje : public QObject, public QGraphicsPixmapItem
     Q_OBJECT
 public:
     Personaje();
+    void moverPersonaje(char direccion);
 
 public slots:
-    void ActualizarImagen();
+    void ActualizarImagen(int fila);
 
 private:
     QPixmap pixmap;

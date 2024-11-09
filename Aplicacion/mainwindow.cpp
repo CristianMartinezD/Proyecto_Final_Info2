@@ -18,7 +18,7 @@ MainWindow::MainWindow(QWidget *parent)
     Rectangulo = escenaLaberinto->addRect(75, 143, 50, 50);
 
     timer = new QTimer(this);
-    connect(timer, SIGNAL(timeout()), this, SLOT(llamarActualizarImagen()));
+    //connect(timer, SIGNAL(timeout()), this, SLOT(llamarActualizarImagen()));
     timer->start(100); // modifica la velocidad en que itera entre las imágenes
 
 }
@@ -27,20 +27,49 @@ MainWindow::MainWindow(QWidget *parent)
 
 
 
-void MainWindow::llamarActualizarImagen()
+// MÉTODO QUE DETECTA CUANDO SE PRECIONAN TECLAS //
+void MainWindow::keyPressEvent(QKeyEvent *e)
 {
-    Homero->ActualizarImagen();
-    bool moverse = true;
-    for(auto iter = Bloques.begin(); iter < Bloques.end(); ++iter){
-        if(Homero->collidesWithItem(*iter)){
-            Rectangulo->setPen(QPen(Qt::red, 2)); // Aquí logica de no atravezar pared
-            moverse = false;
-        }
-        else Rectangulo->setPen(QPen(Qt::green, 2));
-    }
+    // Guardamos la posición actual del personaje antes de moverlo
+    qreal posXAnterior = Homero->x();
+    qreal posYAnterior = Homero->y();
 
-    if (moverse) Homero->setPos(Homero->x() - 5, Homero->y());
+    switch (e->key()) {
+        case Qt::Key_D: {  // Mover a la derecha
+            Homero->ActualizarImagen(100);
+            Homero->setPos(Homero->x() + 5, Homero->y());  // Intentar mover a la derecha
+            if (tocarPared()) {  // Si colisiona, restauramos a la posición anterior
+                Homero->setPos(posXAnterior, posYAnterior);
+            }
+            break;
+        }
+        case Qt::Key_A: {  // Mover a la izquierda
+            Homero->ActualizarImagen(300);
+            Homero->setPos(Homero->x() - 5, Homero->y());  // Intentar mover a la izquierda
+            if (tocarPared()) {
+                Homero->setPos(posXAnterior, posYAnterior);
+            }
+            break;
+        }
+        case Qt::Key_W: {  // Mover hacia arriba
+            Homero->ActualizarImagen(200);
+            Homero->setPos(Homero->x(), Homero->y() - 5);  // Intentar mover hacia arriba
+            if (tocarPared()) {
+                Homero->setPos(posXAnterior, posYAnterior);
+            }
+            break;
+        }
+        case Qt::Key_Z: {  // Mover hacia abajo
+            Homero->ActualizarImagen(0);
+            Homero->setPos(Homero->x(), Homero->y() + 5);  // Intentar mover hacia abajo
+            if (tocarPared()) {
+                Homero->setPos(posXAnterior, posYAnterior);
+            }
+            break;
+        }
+    }
 }
+
 
 
 
@@ -67,6 +96,24 @@ void MainWindow::crearLaberinto()
             if (configLab[i][j] == 1) Bloques.append(escenaLaberinto->addRect(j*67,i*67,67,67,QPen(Qt::black,2),QBrush(Qt::green)));
         }
     }
+}
+
+
+
+
+
+bool MainWindow::tocarPared()
+{
+    bool tocoLaPared = false;
+    for(auto iter = Bloques.begin(); iter < Bloques.end(); ++iter){
+        if(Homero->collidesWithItem(*iter)){
+            Rectangulo->setPen(QPen(Qt::red, 2)); // Aquí logica de no atravezar pared
+            tocoLaPared = true;
+        }
+        else Rectangulo->setPen(QPen(Qt::green, 2));
+    }
+
+    return tocoLaPared;
 }
 
 

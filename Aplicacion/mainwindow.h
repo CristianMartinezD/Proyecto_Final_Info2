@@ -6,6 +6,7 @@
 #include <QTimer>
 #include <QGraphicsRectItem>
 #include <QList>
+#include <QKeyEvent>
 
 #include "personaje.h"
 
@@ -21,11 +22,15 @@ class MainWindow : public QMainWindow
 
 public:
     MainWindow(QWidget *parent = nullptr);
+    void crearLaberinto();
+    bool tocarPared();
     ~MainWindow();
 
+protected:
+    void keyPressEvent(QKeyEvent *e);
+
 public slots:
-    void llamarActualizarImagen();
-    void crearLaberinto();
+
 
 private:
     Ui::MainWindow *ui;
