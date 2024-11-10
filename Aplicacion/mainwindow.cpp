@@ -15,7 +15,6 @@ MainWindow::MainWindow(QWidget *parent)
     Homero = new Personaje();
     escenaLaberinto->addItem(Homero);
     Homero->setPos(1300, 330);
-    Rectangulo = escenaLaberinto->addRect(75, 143, 50, 50);
 
     timer = new QTimer(this);
     //connect(timer, SIGNAL(timeout()), this, SLOT(llamarActualizarImagen()));
@@ -82,10 +81,10 @@ void MainWindow::crearLaberinto()
         {1,0,1,1,1,1,0,0,0,0,0,0,0,0,1,0,1,1,1,1},
         {1,0,0,0,0,0,0,1,1,0,1,0,1,0,1,0,0,0,0,1},
         {1,0,1,1,1,1,0,0,0,0,1,1,1,0,1,0,1,1,0,1},
-        {1,0,1,1,0,1,0,1,1,0,1,1,1,0,1,0,1,1,0,1},
+        {1,0,1,1,0,1,0,0,0,0,1,0,1,0,1,0,1,1,0,1},
         {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-        {1,0,1,1,1,1,0,1,1,0,1,1,1,0,1,0,1,1,0,1},
-        {1,0,0,0,1,1,0,1,0,0,1,1,1,0,1,0,1,1,0,1},
+        {1,0,1,1,1,1,0,1,1,0,1,0,1,0,1,0,1,1,0,1},
+        {1,0,0,0,1,0,0,1,0,0,1,1,1,0,1,0,1,1,0,1},
         {1,0,1,0,1,1,0,1,1,0,1,0,1,0,1,0,0,0,0,1},
         {0,0,1,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,1,1},
         {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
@@ -96,6 +95,40 @@ void MainWindow::crearLaberinto()
             if (configLab[i][j] == 1) Bloques.append(escenaLaberinto->addRect(j*67,i*67,67,67,QPen(Qt::black,2),QBrush(Qt::green)));
         }
     }
+
+
+    // Crear items de imagen para las ruedas
+    for (int i = 0; i < 3; ++i) {  // Ajusta la cantidad de ruedas si es necesario
+        QGraphicsPixmapItem* rueda = new QGraphicsPixmapItem();
+
+        QPixmap pixmap(":/imagenes/rueda.png");
+        if (i == 0){
+            rueda->setPixmap(pixmap.scaled(50, 50, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+            rueda->setPos(90, 344);
+        }
+        if (i == 1){
+            rueda->setPixmap(pixmap.scaled(100, 100, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+            rueda->setPos(510, 210);
+        }
+        if (i == 2){
+            rueda->setPixmap(pixmap.scaled(45, 45, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+            rueda->setPos(745, 267);
+        }
+
+        escenaLaberinto->addItem(rueda);
+        ruedas.append(rueda);
+        angulos.append(0);  // Inicializamos el ángulo de cada rueda
+    }
+
+    // Establece el punto de origen de rotación para la hélice en su centro
+    ruedas[0]->setTransformOriginPoint(ruedas[0]->boundingRect().center());
+    ruedas[2]->setTransformOriginPoint(ruedas[2]->boundingRect().center());
+    anguloHelice = 0; // Ángulo inicial de rotación para la hélice
+
+    // Configurar el temporizador
+    timerRuedas = new QTimer(this);
+    connect(timerRuedas, &QTimer::timeout, this, &MainWindow::moverRuedas);
+    timerRuedas->start(50);  // Ajusta según la velocidad deseada
 }
 
 
@@ -107,14 +140,59 @@ bool MainWindow::tocarPared()
     bool tocoLaPared = false;
     for(auto iter = Bloques.begin(); iter < Bloques.end(); ++iter){
         if(Homero->collidesWithItem(*iter)){
-            Rectangulo->setPen(QPen(Qt::red, 2)); // Aquí logica de no atravezar pared
             tocoLaPared = true;
         }
-        else Rectangulo->setPen(QPen(Qt::green, 2));
     }
 
     return tocoLaPared;
 }
+
+
+
+int contador = 0;
+void MainWindow::moverRuedas()
+{
+    const float radio = 8.0f;  // Radio del movimiento circular
+    const float velocidadAngular = 0.2f;  // Velocidad de rotación
+    const float velocidadRotacionHelice = 20.0f; // Velocidad de rotación de la hélice
+
+    for (int i = 0; i < ruedas.size(); ++i) {
+        if (i == 0 || i == 2) {  // La primera rueda es la hélice
+            anguloHelice += velocidadRotacionHelice;
+            ruedas[i]->setRotation(anguloHelice);
+
+            // Mantener el ángulo en un rango de 0 a 360 grados
+            if (anguloHelice >= 360.0f) anguloHelice -= 360.0f;
+
+            static bool cambiarDireccionDelMovimiento;
+            if (contador <= 0) cambiarDireccionDelMovimiento = true;
+            else if (contador >= 300) cambiarDireccionDelMovimiento = false;
+            if (cambiarDireccionDelMovimiento){
+                contador += 5;
+                ruedas[0]->setPos(ruedas[0]->x()+5, ruedas[0]->y());
+                ruedas[2]->setPos(ruedas[2]->x(), ruedas[2]->y()+2.6);
+            }
+            else{
+                contador -= 5;
+                ruedas[0]->setPos(ruedas[0]->x()-5, ruedas[0]->y());
+                ruedas[2]->setPos(ruedas[2]->x(), ruedas[2]->y()-2.6);
+            }
+
+        } else {
+            angulos[i] += velocidadAngular;
+
+            float x = ruedas[i]->x() + radio * cos(angulos[i]);
+            float y = ruedas[i]->y() + radio * sin(angulos[i]);
+
+            ruedas[i]->setPos(x, y);
+
+            // Mantener el ángulo en un rango de 0 a 2π radianes
+            if (angulos[i] >= 2 * M_PI) angulos[i] -= 2 * M_PI;
+        }
+    }
+}
+
+
 
 
 

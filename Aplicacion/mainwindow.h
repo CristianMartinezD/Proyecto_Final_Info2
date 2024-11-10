@@ -5,6 +5,7 @@
 #include <QGraphicsScene>
 #include <QTimer>
 #include <QGraphicsRectItem>
+#include <QGraphicsPixmapItem>
 #include <QList>
 #include <QKeyEvent>
 
@@ -24,6 +25,7 @@ public:
     MainWindow(QWidget *parent = nullptr);
     void crearLaberinto();
     bool tocarPared();
+    void moverRuedas();
     ~MainWindow();
 
 protected:
@@ -38,9 +40,16 @@ private:
     Personaje *Homero; // Personaje animado
     QTimer *timer;     // Temporizador para actualizar la animación
 
-    QGraphicsRectItem* Rectangulo;
-
     QList<QGraphicsRectItem*> Bloques;
+
+
+
+    QList<QGraphicsPixmapItem*> ruedas; // Lista de items de imagen para las ruedas
+    QList<float> angulos;                 // Lista de ángulos para el movimiento circular
+    float anguloHelice;                   // Ángulo de rotación de la hélice
+    QTimer* timerRuedas;                  // Temporizador para mover las elipses
+    QPixmap imagenRueda;
+
 };
 
 #endif // MAINWINDOW_H
