@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>imagenes/Homero.png</file>
+        <file>imagenes/rueda.png</file>
+    </qresource>
+</RCC>
