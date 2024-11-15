@@ -23,12 +23,17 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+signals:
+    void llamarJuegoAhorcado();
+
 public slots:
     void llamarActualizarImagen();
     void crearLaberinto();
+    void juegoAhorcado();
 
 private:
     Ui::MainWindow *ui;
+    QGraphicsScene *escenaEscape;
     QGraphicsScene *escenaLaberinto;
     Personaje *Homero; // Personaje animado
     QTimer *timer;     // Temporizador para actualizar la animación
@@ -36,6 +41,9 @@ private:
     QGraphicsRectItem* Rectangulo;
 
     QList<QGraphicsRectItem*> Bloques;
+
+    void crearEscape();
+
 };
 
 #endif // MAINWINDOW_H
