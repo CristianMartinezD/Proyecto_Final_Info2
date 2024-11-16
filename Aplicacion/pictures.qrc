@@ -3,6 +3,13 @@
         <file>imagenes/Homero.png</file>
         <file>imagenes/fondo.png</file>
         <file>imagenes/pared.png</file>
-        <file>imagenes/margey.png</file>
+        <file>imagenes/barney.png</file>
+        <file>imagenes/burns.png</file>
+        <file>imagenes/clancy.png</file>
+        <file>imagenes/milhouse.png</file>
+        <file>imagenes/nelson.png</file>
+        <file>imagenes/rueda.png</file>
+        <file>imagenes/seymour.png</file>
+        <file>imagenes/jeff.png</file>
     </qresource>
 </RCC>
