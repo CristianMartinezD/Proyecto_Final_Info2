@@ -8,14 +8,18 @@ class Personaje : public QObject, public QGraphicsPixmapItem
     Q_OBJECT
 public:
     Personaje();
-
-public slots:
+    Personaje(QString nombrePersonaje);
     void ActualizarImagen(int fila);
+    void setVidas(short valor, QChar operacion);
+    short getVidas();
+    ~Personaje();
 
-private:
+protected: // Cambiado de private a protected
     QPixmap pixmap;
     int columnas;
     int ancho, alto;
+    QString nombrePersonaje;
+    short vidas;
 };
 
 #endif // PERSONAJE_H
