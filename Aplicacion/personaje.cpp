@@ -1,22 +1,48 @@
 #include "personaje.h"
 
-Personaje::Personaje(QString personaje) : columnas(0), ancho(100), alto(100)
-{
-    if(personaje == "Homero") pixmap = QPixmap(":/imagenes/Homero.png");
-    setPixmap(pixmap.copy(columnas, 100, ancho, alto).scaled(56, 56, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+Personaje::Personaje(){}
 
-    /*
-    if(personaje == "Enemigo") pixmap = QPixmap(":/imagenes/Enemigo.png");
-    setPixmap(pixmap.copy(columnas, 100, ancho, alto).scaled(56, 56, Qt::KeepAspectRatio, Qt::SmoothTransformation));
-    */
+Personaje::Personaje(QString _nombrePersonaje) : columnas(0), ancho(100), alto(100)
+{
+    nombrePersonaje = _nombrePersonaje;
+    if(_nombrePersonaje == "Homero"){
+        pixmap = QPixmap(":/imagenes/Homero.png");
+        setPixmap(pixmap.copy(columnas, 100, ancho, alto).scaled(50, 50, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+        vidas = 7;
+    }
+
+    else if(_nombrePersonaje == "Policia1" || _nombrePersonaje == "Policia2"){
+        pixmap = QPixmap(":/imagenes/policia.png");
+        setPixmap(pixmap.copy(columnas, 0, ancho, alto).scaled(50, 50, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+        vidas = 1;
+    }
+    else if (_nombrePersonaje == "HomeroEnCarro"){
+        setPixmap(QPixmap(":/imagenes/carro.png").scaled(150,60, Qt::KeepAspectRatio));
+    }
 }
 
 
 void Personaje::ActualizarImagen(int fila)
 {
     columnas += 100;
-    if (columnas >= 600) columnas = 0;
-    setPixmap(pixmap.copy(columnas, fila, ancho, alto).scaled(56, 56, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    if(nombrePersonaje == "Homero"){
+        if (columnas >= 600) columnas = 0;
+    }
+    else if(nombrePersonaje == "Policia1" || nombrePersonaje == "Policia2"){
+        if (columnas >= 300) columnas = 0;
+    }
+    setPixmap(pixmap.copy(columnas, fila, ancho, alto).scaled(50, 50, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+}
+
+void Personaje::setVidas(short valor, QChar operacion)
+{
+    if (operacion == '-') vidas -= valor;
+    else vidas += valor;
+}
+
+short Personaje::getVidas()
+{
+    return vidas;
 }
 
 Personaje::~Personaje(){}

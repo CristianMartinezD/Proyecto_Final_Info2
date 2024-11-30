@@ -9,6 +9,11 @@
 #include <QGraphicsPixmapItem>
 #include <QList>
 #include <QKeyEvent>
+#include <QtMath>
+#include <QMediaPlayer>
+#include <QUrl>
+#include <QAudioOutput>
+#include <QSoundEffect>
 /*##################################*/
 
 
@@ -28,9 +33,13 @@
 #include <QString>
 #include <QRandomGenerator>
 #include <QPair>
+#include <cstdlib>
+#include <ctime>
 /*##################################*/
 
 #include "personaje.h"
+#include "enemigo.h"
+#include "helicoptero.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -48,14 +57,30 @@ public:
     bool tocarPared();     // Cristian
     void moverRuedas();    // Cristian
     void cambiarDeEscena(int escena); // Cristian
+    void juegoAhorcado(); // Juan
+    void dispararBola(QString policia);
+    void moverBalas(QGraphicsPixmapItem *policia, QList<QGraphicsEllipseItem *> &balas);
+    void configurarElementosDeLaEscenaLaberinto();
+    void anuncio(QString tipoAnuncio);
+    void reiniciarVariables(QString motivoReinicio);
+    void llamasDeFuego();
+    void moverConResorte(QGraphicsPixmapItem* mano, double x, double y, double A, double beta, double omega);
+    void iniciarResortes(bool primeraVez = true);
+    void reproducirSonidos(QString sonidoAreproducir);
+    void reinicializarLetras();
+    void recogerLetra();
+    void mostrarTextoParpadeante(QGraphicsTextItem* textoParpadeante, int duracionTotalMs, int intervaloParpadeoMs);
     ~MainWindow();
+
+signals:
+    void senalParaMoverElResorte(QGraphicsPixmapItem* mano); // Señal parametrizada con la mano que debe moverse
+    //void llamarJuegoAhorcado();
 
 protected:
     void keyPressEvent(QKeyEvent *e);
 
 public slots:
     void controlDeTemporizadores(); // Cristian
-    void juegoAhorcado(); // Juan
 
 private:
     Ui::MainWindow *ui;
@@ -63,10 +88,9 @@ private:
     QGraphicsScene *escenaLaberinto;
     bool misionSuperada = false; // Si cambia a true configuramos la siguiente escena y la ponemos en el GraphicsView
     Personaje *Homero;
-    QTimer *timer, *timer1;     // timer para invocar cada 50 mls a controlDeTemporizadores();
-    unsigned short Temporizadores[5] = {0, 0, 0, 0, 0};
+    QTimer *timer;
 
-    QList<QGraphicsRectItem*> Bloques;
+    QList<QGraphicsPixmapItem*> Bloques;
 
     QList<QGraphicsPixmapItem*> ruedas; // Lista de items de imagen para las ruedas
     QList<float> angulos;                 // Lista de ángulos para el movimiento circular
@@ -74,14 +98,52 @@ private:
     QPixmap imagenRueda;
 
     int escenaActual = 1;
+
+    Enemigo *Policia1, *Policia2;
+    QList<QGraphicsEllipseItem *> balasPolicia1; // Lista de balas disparadas por Policia1
+    QList<QGraphicsEllipseItem *> balasPolicia2; // Lista de balas disparadas por Policia2
+    int tiempoMoverBalas = 0, moverAgujaReloj = 0, Reloj = 120;
+    QString ejeDisparoPolicia1, ejeDisparoPolicia2;
+    QGraphicsTextItem *textRelojLaberinto, *textVidas, *textClave;
+    QGraphicsRectItem *recuadro;
+    QGraphicsPixmapItem *imagenFondo;
+    QPushButton *botonReintentar;
+    QPushButton *botonSalir;
+    QGraphicsProxyWidget *proxyReintentar;
+    QGraphicsProxyWidget *proxySalir;
+    QGraphicsPixmapItem* fuego;
+    QPixmap pixmapFuego;
+    QGraphicsPixmapItem* puerta;
+    // Manos
+    QGraphicsPixmapItem* mano1, *mano2, *mano3;
+    // Parámetros para cada mano
+    QMap<QGraphicsPixmapItem*, QVector<double>> parametrosMovimientos;
+    bool permitirEmision = true; // Controla si se emite la señal para mover el resorte
+    QMediaPlayer *musicaFondoLaberinto, *sonidoDisparo;
+    QAudioOutput *volumenFondoLaberinto, *volumenDisparo;
+    QList<QGraphicsTextItem*> ListaLetras;
+    QVector<QPoint> listaDePuntos;
+    short int claveObtenida;
     /*############# FIN CRISTIAN ################*/
 
 
     /* JUAN LUIS */
+
+    bool removido = false;
+
     QGraphicsScene *escenaEscape;
     void crearEscape();
 
+    QGraphicsScene *escenaCarrera;
+    void crearCarrera();
+    Helicoptero* helicoptero;
+
+    void colocarObstaculos(QGraphicsScene* scene, int dificultad);
+    void moverObstaculos(QGraphicsScene* scene);
+
+    QList <QGraphicsPixmapItem*> obstaculos;
+    int carrilAnterior;
+    bool ablePower = true;
 };
 
 #endif // MAINWINDOW_H
-
