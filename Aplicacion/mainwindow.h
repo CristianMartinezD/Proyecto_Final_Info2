@@ -150,6 +150,12 @@ private:
     int indexClave = 0;
 
     void colocarLetras(QGraphicsScene* scene);
+
+    QGraphicsScene* escenaMenu;
+    void crearMenu();
+
+    void recuadroGameOver();
+
 };
 
 #endif // MAINWINDOW_H
