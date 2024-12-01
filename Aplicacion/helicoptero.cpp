@@ -1,6 +1,7 @@
 #include "helicoptero.h"
 #include <cmath>
 #include <QTimer>
+#include <QEventLoop>
 
 Helicoptero::Helicoptero() {
 
@@ -14,10 +15,24 @@ void Helicoptero::lanzarMisil(qreal xFin, qreal yFin, QGraphicsScene *scene){
 
     activeMisil = true;
 
+    QGraphicsPixmapItem* mira = new QGraphicsPixmapItem();
+    mira->setPixmap(QPixmap(":/imagenes/mira.png").scaled(40,40,Qt::KeepAspectRatio));
+    mira->setPos(xFin+30,yFin);
+    scene->addItem(mira);
+
     xFin += 30;//Ajustes graficos
     yFin -= 60;//Ajustes graficos
     qreal xIni = x() + 180 ; //Ajustes graficos
     qreal yIni = y() + 100; //Ajustes graficosx
+
+    QTimer* tiempo = new QTimer(this);
+    connect(tiempo,&QTimer::timeout,this, [=] (){
+        scene->removeItem(mira);
+        delete mira;
+        tiempo->stop();
+    });
+    tiempo->start(1500);
+
 
     misil = new QGraphicsPixmapItem();
     misil->setPixmap(QPixmap(":/imagenes/misil.png").scaled(50,20,Qt::KeepAspectRatio));

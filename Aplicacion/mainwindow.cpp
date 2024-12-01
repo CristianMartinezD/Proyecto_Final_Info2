@@ -12,13 +12,68 @@ MainWindow::MainWindow(QWidget *parent)
 
 }
 
+void MainWindow::crearMenu(){
+/*
+    for (int i = 0; i<1340;i+=20){
+        for (int j = 0; j<1340;j+=20){
+            escenaMenu->addEllipse(j,i,1,1)->setZValue(10);
+        }
+    }
+*/
+    escenaMenu->setSceneRect(0,0,1330,670);
+    escenaMenu->setBackgroundBrush(QPixmap(":/imagenes/fondoMenu2.png").scaled(1330,670,Qt::IgnoreAspectRatio));
 
+    QPushButton* nuevaPartidaButton = new QPushButton("Nueva Partida");
+    QPushButton* continuarPartidaButton = new QPushButton("Continuar");
+
+    QFont fuente = QFont("Upheaval TT (BRK)",30);
+
+    QPalette paleta;
+    paleta.setColor(QPalette::Button,QColorConstants::Cyan);
+    paleta.setColor(QPalette::ButtonText,Qt::black);
+    nuevaPartidaButton->setFont(fuente);
+    continuarPartidaButton->setFont(fuente);
+    nuevaPartidaButton->setPalette(paleta);
+    continuarPartidaButton->setPalette(paleta);
+
+    QGraphicsProxyWidget* proxyNuevaPartida = escenaMenu->addWidget(nuevaPartidaButton);
+    QGraphicsProxyWidget* proxyContinuar = escenaMenu->addWidget(continuarPartidaButton);
+
+    proxyNuevaPartida->setPos(295,500);
+    proxyContinuar->setPos(720,500);
+
+    connect(nuevaPartidaButton, &QPushButton::clicked, this, [=]() mutable {
+/*
+ *  LIBERAR MEMORIA
+        escenaMenu->removeItem(proxyContinuar);
+        escenaMenu->removeItem(proxyNuevaPartida);
+        delete proxyContinuar;
+        delete proxyNuevaPartida;
+*/
+        cambiarDeEscena(1);
+    });
+
+    connect(continuarPartidaButton, &QPushButton::clicked, this, [=] () mutable {
+    /*
+     * LIBERAR MEMORIA ESCENA ACTUAL
+     *
+     *  FUNCION CARGAR ESCENA Y DATOS DESDE UN ARCHIVO;
+    */
+    });
+}
 
 void MainWindow::cambiarDeEscena(int escena)
 {
-    if (escena == 1) { /* CONFIGURAMOS TODO PARA LA ESCENA 1 (Abrir puerta - JUAN) */
-        ui->graphicsView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-        ui->graphicsView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    ui->graphicsView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    ui->graphicsView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
+    if (escena == 0){
+        escenaMenu = new QGraphicsScene();
+        crearMenu();
+        ui->graphicsView->setScene(escenaMenu);
+    }
+    else if  (escena == 1) { /* CONFIGURAMOS TODO PARA LA ESCENA 1 (Abrir puerta - JUAN) */
+
 
         escenaEscape = new QGraphicsScene();
         crearEscape();
@@ -27,9 +82,6 @@ void MainWindow::cambiarDeEscena(int escena)
     }
 
     else if (escena == 2){ /* CONFIGURAMOS TODO PARA LA ESCENA 2 (Laberinto - CRISTIAN) */
-
-        ui->graphicsView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-        ui->graphicsView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
         QImage imagen(":/imagenes/fondoLaberinto.png");
         escenaLaberinto = new QGraphicsScene();
@@ -65,9 +117,6 @@ void MainWindow::cambiarDeEscena(int escena)
         sonidoDisparo->setAudioOutput(volumenDisparo);
     }
     else if (escena == 3) {
-
-        ui->graphicsView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-        ui->graphicsView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
         escenaCarrera = new QGraphicsScene();
         crearCarrera();
@@ -404,10 +453,10 @@ void MainWindow::colocarObstaculos(QGraphicsScene* scene, int dificultad) {
     qreal x = 0, y = 0;
     if (carril == 1) { x = 1450; y = 550; }
     if (carril == 2) { x = 1400; y = 600; }
-    if (carril == 3) { x = 1350; y= 650; }
+    if (carril == 3) { x = 1350; y = 660; }
 
     QGraphicsPixmapItem* obstaculo = new QGraphicsPixmapItem();
-    obstaculo->setPixmap(QPixmap(":/imagenes/pared.png").scaled(100,100));
+    obstaculo->setPixmap(QPixmap(":/imagenes/pared.png").scaled(100,50));
     obstaculo->setPos(x,y);
     obstaculo->setRotation(180);
     QTransform transform;
@@ -427,10 +476,10 @@ void MainWindow::colocarObstaculos(QGraphicsScene* scene, int dificultad) {
 
         if (carril2 == 1) { x = 1450; y = 550; }
         if (carril2 == 2) { x = 1400; y = 600; }
-        if (carril2 == 3) { x = 1350; y= 650; }
+        if (carril2 == 3) { x = 1350; y= 660; }
 
         QGraphicsPixmapItem* obstaculo2 = new QGraphicsPixmapItem();
-        obstaculo2->setPixmap(QPixmap(":/imagenes/pared.png").scaled(100,100));
+        obstaculo2->setPixmap(QPixmap(":/imagenes/pared.png").scaled(100,50));
         obstaculo2->setPos(x,y);
         obstaculo2->setRotation(180);
         obstaculo2->setTransform(transform);
@@ -488,7 +537,7 @@ void MainWindow::crearCarrera(){
 /*
     for (int i = 0; i<1340;i+=20){
         for (int j = 0; j<1340;j+=20){
-            escenaCarrera->addEllipse(j,i,1,1)->setZValue(10);
+            escenaCarrera->addEllipse(j,i,1,1)->setZValue(100);
         }
     }
 */
@@ -518,7 +567,8 @@ void MainWindow::crearCarrera(){
 
         for (auto obstaculo : obstaculos){
             if (Homero->collidesWithItem(obstaculo)){
-                //GAME OVER
+                timer->stop();
+                recuadroGameOver();
             }
         }
 
@@ -588,23 +638,58 @@ void MainWindow::crearCarrera(){
 
     connect(helicoptero,&Helicoptero::posExplosion, this, [=] (int y) mutable {
         if (y>430 && y < 475 && Homero->y()==500 && Homero->x() == 470){//Explosion en carril 1
-            /*
-                GAME OVER
-            */
+            timer->stop();
+            recuadroGameOver();
         }else if (y>485 && y<535 && Homero->y() == 555  && Homero->x() == 470){ //Explosion en carril 2
-            /*
-                GAME OVER
-            */
+            timer->stop();
+            recuadroGameOver();
         }else if (y>550 && y < 595 && Homero->y() == 610  && Homero->x() == 470){ //Explosion en carril 3
-            /*
-                GAME OVER
-            */
+            timer->stop();
+            recuadroGameOver();
         }
     });
 
 }
 
+void MainWindow::recuadroGameOver(){
 
+    QGraphicsPixmapItem* fondo = new QGraphicsPixmapItem(QPixmap(":/imagenes/gameover3.png").scaled(665,185,Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation));
+    fondo->setPos(332,182);
+    fondo->setZValue(10);
+    escenaCarrera->addItem(fondo);
+
+    QPushButton* reiniciarButton = new QPushButton("Reiniciar");
+    QPushButton* salirButton = new QPushButton("Salir");
+
+    QFont fuente = QFont("Upheaval TT (BRK)",20);
+    QPalette paleta;
+    paleta.setColor(QPalette::Button,QColorConstants::Green);
+    paleta.setColor(QPalette::ButtonText,Qt::black);
+    reiniciarButton->setFont(fuente);
+    salirButton->setFont(fuente);
+    reiniciarButton->setPalette(paleta);
+    salirButton->setPalette(paleta);
+
+    QGraphicsProxyWidget* proxyReiniciar = escenaCarrera->addWidget(reiniciarButton);
+    QGraphicsProxyWidget* proxySalir = escenaCarrera->addWidget(salirButton);
+    proxyReiniciar->setZValue(11);
+    proxySalir->setZValue(11);
+
+
+    proxyReiniciar->setPos(480,455);
+    proxySalir->setPos(720,455);
+
+    connect(reiniciarButton, &QPushButton::clicked, this, [=] () mutable {
+        // MOVER LAS VARIABLES AL .H
+    });
+    connect(salirButton, &QPushButton::clicked, this, [=] () mutable {
+        /*
+        LIBERAR MEMORIA
+        */
+        cambiarDeEscena(0);
+    });
+
+}
 
 void MainWindow::controlDeTemporizadores()
 {
@@ -1015,7 +1100,7 @@ void MainWindow::configurarElementosDeLaEscenaLaberinto()
     recuadro->setPos(escenaLaberinto->width() / 2 - (width / 2) - 240, escenaLaberinto->height() / 2 - height / 2);
 
     // Crear una imagen de fondo para el recuadro
-    imagenFondo = new QGraphicsPixmapItem(QPixmap(":/imagenes/GameOver.png").scaled(700, 500, Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation), recuadro);
+    imagenFondo = new QGraphicsPixmapItem(QPixmap(":/imagenes/GameOver.png").scaled(700, 500, Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation),recuadro);
     imagenFondo->setPos(0, 0); // Alinear la imagen con el recuadro
     // Botón "Reintentar"
     botonReintentar = new QPushButton("Reintentar");
