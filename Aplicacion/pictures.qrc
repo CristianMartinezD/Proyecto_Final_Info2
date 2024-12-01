@@ -28,7 +28,6 @@
         <file>imagenes/seymour.png</file>
         <file>imagenes/misil.png</file>
         <file>imagenes/mira.png</file>
-        <file>imagenes/fondomenu.jpg</file>
         <file>imagenes/fondoMenu2.png</file>
         <file>imagenes/gameover3.png</file>
     </qresource>
