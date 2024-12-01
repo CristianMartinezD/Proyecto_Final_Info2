@@ -1,8 +1,8 @@
 <RCC>
     <qresource prefix="/">
-        <file>audios/au.WAV</file>
-        <file>audios/disparo.wav</file>
-        <file>audios/fondoLaberinto.mp3</file>
-        <file>audios/victoria.WAV</file>
+      <file>audios/au.WAV</file>
+      <file>audios/disparo.wav</file>
+      <file>audios/fondoLaberinto.mp3</file>
+      <file>audios/victoria.WAV</file>
     </qresource>
 </RCC>
