@@ -156,6 +156,21 @@ private:
 
     void recuadroGameOver();
 
+    QPushButton* pausaBoton;
+    QPainterPath path;
+    QGraphicsPathItem* rect;
+    bool firstpath = true;
+
+
+
+    QPushButton* salirBoton;
+    bool pausado = false;
+
+    bool able1 = true, able2 = false, able3 = false, able4 = false;
+
+    void guardar();
+    void continuar();
+
 };
 
 #endif // MAINWINDOW_H

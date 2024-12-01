@@ -6,7 +6,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    Homero = new Personaje("Homero");
+    //Homero = new Personaje("Homero");
 
     cambiarDeEscena(3);
 
@@ -56,8 +56,10 @@ void MainWindow::crearMenu(){
     connect(continuarPartidaButton, &QPushButton::clicked, this, [=] () mutable {
     /*
      * LIBERAR MEMORIA ESCENA ACTUAL
-     *
-     *  FUNCION CARGAR ESCENA Y DATOS DESDE UN ARCHIVO;
+     */
+
+     /*
+      FUNCION CARGAR ESCENA Y DATOS DESDE UN ARCHIVO;
     */
     });
 }
@@ -68,14 +70,25 @@ void MainWindow::cambiarDeEscena(int escena)
     ui->graphicsView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
     if (escena == 0){
+
         escenaMenu = new QGraphicsScene();
         crearMenu();
         ui->graphicsView->setScene(escenaMenu);
     }
     else if  (escena == 1) { /* CONFIGURAMOS TODO PARA LA ESCENA 1 (Abrir puerta - JUAN) */
 
-
+        Homero = new Personaje("Homero");
         escenaEscape = new QGraphicsScene();
+
+        if (firstpath) {
+            path.addRoundedRect(0,0,1330,670,0,0);
+            firstpath = false;
+        }
+        rect = new QGraphicsPathItem();
+        //path = new QPainterPath();
+        //path.addRoundedRect(0,0,1330,670,0,0);
+        //rect = new QGraphicsPathItem();
+
         crearEscape();
 
         ui->graphicsView->setScene(escenaEscape);
@@ -83,6 +96,7 @@ void MainWindow::cambiarDeEscena(int escena)
 
     else if (escena == 2){ /* CONFIGURAMOS TODO PARA LA ESCENA 2 (Laberinto - CRISTIAN) */
 
+        Homero = new Personaje("Homero");
         QImage imagen(":/imagenes/fondoLaberinto.png");
         escenaLaberinto = new QGraphicsScene();
 
@@ -118,6 +132,7 @@ void MainWindow::cambiarDeEscena(int escena)
     }
     else if (escena == 3) {
 
+        Homero = new Personaje("HomeroEnCarro");
         escenaCarrera = new QGraphicsScene();
         crearCarrera();
         ui->graphicsView->setScene(escenaCarrera);
@@ -140,7 +155,7 @@ void MainWindow::crearEscape() {
     Homero->setPos(210,300);
     escenaEscape->addItem(Homero);
 
-    timer = new QTimer(this);
+    QTimer* timer = new QTimer(this);
     connect(timer, &QTimer::timeout,this, [=]() {
         Homero->ActualizarImagen(0);
         Homero->setPos(Homero->x() + 30, Homero->y());
@@ -156,9 +171,77 @@ void MainWindow::crearEscape() {
         }
     });
     timer->start(200);
+/*BOTON DE PAUSA**/
+    QFont fuente ("Bauhaus 93",20);
+    pausaBoton = new QPushButton("||");
+    pausaBoton->setFont(fuente);
+    QPalette paleta;
+    paleta.setColor(QPalette::Button,Qt::green);
+    paleta.setColor(QPalette::ButtonText,Qt::black);
+    pausaBoton->setPalette(paleta);
+    QGraphicsProxyWidget* proxyPausaBoton = escenaEscape->addWidget(pausaBoton);
+    proxyPausaBoton->setPos(1220, 30);
+
+    //QPainterPath path;
+    connect(pausaBoton,&QPushButton::clicked, this, [=] (){
+        if (!able1) return;
+
+        pausado = !pausado;
+
+        if (pausado){
+            /****/
+            rect = escenaEscape->addPath(path);
+            rect->setOpacity(0.6);
+            rect->setZValue(2);
+            rect->setBrush(QBrush(Qt::black));
+            rect->setPen(QPen(Qt::NoPen));
+            /****/
+            pausaBoton->setText("►");
+            timer->stop();
+        }else {
+            escenaEscape->removeItem(rect);
+            delete rect;
+            rect = nullptr;
+            pausaBoton->setText("||");
+            timer->start(200);
+        }
+    });
+
+/************/
+
+/*BOTON SALIR*/
+    salirBoton = new QPushButton("←");
+    salirBoton->setFont(fuente);
+    salirBoton->setPalette(paleta);
+    QGraphicsProxyWidget* proxySalirBoton = escenaEscape->addWidget(salirBoton);
+    proxySalirBoton->setPos(1220,80);
+
+    connect(salirBoton,&QPushButton::clicked, this, [=] (){
+        timer->stop();
+        /*Liberar
+         *
+         *
+         *  memoria*/
+        able1 = true; able2 = false; able3 = false; able4 = false;
+        pausado = false;
+        cambiarDeEscena(0);
+    });
 }
 
+void MainWindow::guardar(){
+    if (escenaActual == 1){
 
+    }else if (escenaActual == 2){
+
+    }else if (escenaActual == 3){
+
+    }
+}
+
+void MainWindow::continuar(){
+
+
+}
 
 QPair<QString, QPixmap> elegirParAleatorio(const QMap<QString, QPixmap>& personajes) {
     // Convertir las claves a una lista para acceder a ellas por índice
@@ -264,7 +347,7 @@ void MainWindow::juegoAhorcado(){
 
     imagen->setPos(700,170);
     escenaEscape->addItem(imagen);
-    imagen->setZValue(10);
+    imagen->setZValue(1);
 
     QTimer *timer = new QTimer(this);
     connect(timer, &QTimer::timeout,this, [=]() mutable {
@@ -294,6 +377,8 @@ void MainWindow::juegoAhorcado(){
     timer->start(1000);
 
     connect(verificarBoton, &QPushButton::clicked, this, [=]() mutable {
+
+        if (pausado) { letraInput->clear(); return; }
 
         QString letra = letraInput->text().toUpper();
         letraInput->clear();
@@ -349,6 +434,26 @@ void MainWindow::juegoAhorcado(){
                 }
             });
             timer2->start(200);
+        }
+    });
+
+    able1 = false; able2 = true;
+    //this->rect = new QGraphicsPathItem();
+    connect(pausaBoton,&QPushButton::clicked, this, [=] (){
+        if (!able2) return;
+        pausado = !pausado;
+        if (pausado){
+            this->rect= escenaEscape->addPath(this->path);
+            this->rect->setBrush(QBrush(Qt::black));
+            this->rect->setOpacity(0.6);
+            this->rect->setZValue(2);
+            this->rect->setPen(QPen(Qt::NoPen));
+            pausaBoton->setText("►");
+            timer->stop();
+        }else {
+            escenaEscape->removeItem(this->rect);
+            pausaBoton->setText("||");
+            timer->start(1000);
         }
     });
 }
@@ -436,7 +541,7 @@ void MainWindow::crearLaberinto()
     ruedas[2]->setTransformOriginPoint(ruedas[2]->boundingRect().center());
     anguloHelice = 0; // Ángulo inicial de rotación para la hélice
 
-
+    timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(controlDeTemporizadores()));
     timer->start(50); // Reloj Base actualizado
 }
@@ -632,7 +737,7 @@ void MainWindow::crearCarrera(){
     helicoptero->setPos(20,40);
     escenaCarrera->addItem(helicoptero);
 
-    Homero = new Personaje("HomeroEnCarro");
+    //Homero = new Personaje("HomeroEnCarro");
     Homero->setPos(470,555);
     escenaCarrera->addItem(Homero);
 
@@ -686,6 +791,8 @@ void MainWindow::recuadroGameOver(){
         /*
         LIBERAR MEMORIA
         */
+        escenaCarrera->removeItem(Homero);
+        delete Homero;
         cambiarDeEscena(0);
     });
 
@@ -780,6 +887,8 @@ void MainWindow::controlDeTemporizadores()
 // MÉTODO QUE DETECTA CUANDO SE PRECIONAN TECLAS //
 void MainWindow::keyPressEvent(QKeyEvent *e)
 {
+    if (pausado) return;
+
     if (escenaActual == 1) return;
 
     if (escenaActual == 2) {
@@ -880,8 +989,6 @@ void MainWindow::keyPressEvent(QKeyEvent *e)
         }
     }
 }
-
-
 
 
 
