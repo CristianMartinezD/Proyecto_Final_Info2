@@ -441,15 +441,45 @@ void MainWindow::colocarObstaculos(QGraphicsScene* scene, int dificultad) {
     }
 }
 
-void MainWindow::moverObstaculos(QGraphicsScene *scene){
+void MainWindow::colocarLetras(QGraphicsScene *scene){
+
+    srand(time(0));
+    int carril = rand()%3 + 1;
+
+    qreal x = 0 , y = 0;
+    if (carril == 1) {x = 1450, y = 505; }
+    if (carril == 2) { x = 1400; y = 560; }
+    if (carril == 3) { x = 1350; y = 615; }
+
+    QGraphicsTextItem* letra = new QGraphicsTextItem(QString(clave[indexClave]));
+    QFont font ("Cooper Black",24,QFont::Bold);
+    letra->setFont(font);
+    letra->setDefaultTextColor(Qt::red);
+    letra->setPos(x,y);
+    scene->addItem(letra);
+    qDebug()<<"LETRA AÑADIDA";
+    letras.append(letra);
+
+}
+
+void MainWindow::moverObjetos(QGraphicsScene *scene, int velocidad){
 
     for (auto obstaculo : obstaculos){
-        obstaculo->setX(obstaculo->x()-2);
+        obstaculo->setX(obstaculo->x()-velocidad);
 
         if (obstaculo->x() < - 100) {
             scene->removeItem(obstaculo);
             obstaculos.removeOne(obstaculo);
             delete obstaculo;
+        }
+    }
+
+    for (auto letra : letras ){
+        letra->setX(letra->x()-velocidad);
+        if (letra->x()< -100 ){
+            scene->removeItem(letra);
+            letras.removeOne(letra);
+            delete letra;
         }
     }
 }
@@ -469,37 +499,84 @@ void MainWindow::crearCarrera(){
     escenaCarrera->setBackgroundBrush(pixmap.copy(move,0,400,147).scaled(1330,670));
     QTimer* timer = new QTimer(this);
     int cont = 0;//Para mover la escena cada 50ms
-    int cont2 = 0;//Para lanzar misiles y poner obstaculos cada 5s
+    int cont2 = 0;//Para lanzar misiles cada 5s
     int cont3 = 0; //Para poner obstaculos cada 10s
+    int cont4 = 0; //Para mover helocptero y move obstaculos;
+    int cont5 = 0; //Colocar las letras
+    int velocidadObstaculos = 2;//x-2
+    int velocidadFondo = 6;//30 ms
+    int intervaloObstaculos = 500;
+    int aumentoVelocidad = 0;
+    int numObstaculos = 1;
     connect(timer,&QTimer::timeout,this, [=]() mutable {
-        helicoptero->mover();
-        moverObstaculos(escenaCarrera);
+        cont4++;
+        if (cont4 == 2){
+            helicoptero->mover();
+            moverObjetos(escenaCarrera, velocidadObstaculos);
+            cont4 = 0;
+        }
+
         for (auto obstaculo : obstaculos){
             if (Homero->collidesWithItem(obstaculo)){
-                /*
-                    GAME OVER
-                */
+                //GAME OVER
             }
         }
+
+        for (auto letra : letras) {
+            if (Homero->collidesWithItem(letra)){
+                indexClave++;
+                letras.removeOne(letra);
+                escenaCarrera->removeItem(letra);
+                delete letra;
+
+                if (indexClave == clave.size()){
+                    qDebug()<<"GANO";
+                    /*
+                        PASO EL NIVEL
+                    */
+                }
+            }
+        }
+
         cont++;
         cont2++;
         cont3++;
-        if (cont == 2){
+        aumentoVelocidad++;
+
+        if (cont == velocidadFondo || velocidadFondo == 0){
             move++;
             escenaCarrera->setBackgroundBrush(pixmap.copy(move,0,400,147).scaled(1330,670));
             if (move == 800) move = 0;
             cont = 0;
         }
-        if (cont3 == 500){
-            colocarObstaculos(escenaCarrera,2);//dificultad);
-            cont3 = 0;
-        }
-        if(cont2 == 520) {
-            helicoptero->lanzarMisil(Homero->x(),Homero->y(),escenaCarrera, ablePower);
+
+        if(cont2 == 1040) {
+            helicoptero->lanzarMisil(Homero->x(),Homero->y(),escenaCarrera);
             cont2 = 0;
         }
+
+        if (cont3 >= intervaloObstaculos){
+            colocarObstaculos(escenaCarrera,numObstaculos);
+            cont3 = 0;
+        }
+
+        cont5++;
+        if (cont5 == 1800){
+            if (indexClave < clave.size()){
+                colocarLetras(escenaCarrera);
+            }
+            cont5 = 0;
+        }
+
+        if (aumentoVelocidad == 2400){
+            velocidadObstaculos++;
+            if (velocidadFondo > 1) velocidadFondo--;
+            intervaloObstaculos = std::max(200, intervaloObstaculos-50);
+            if (numObstaculos < 2) numObstaculos++;
+            aumentoVelocidad = 0;
+        }
     });
-    timer->start(10);
+    timer->start(5);
 
     helicoptero = new Helicoptero ();
     helicoptero->setPos(20,40);
@@ -524,6 +601,7 @@ void MainWindow::crearCarrera(){
             */
         }
     });
+
 }
 
 

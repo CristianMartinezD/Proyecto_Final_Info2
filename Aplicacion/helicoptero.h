@@ -15,7 +15,7 @@ private:
 
 public:
     Helicoptero();
-    void lanzarMisil(qreal x, qreal y, QGraphicsScene* scene, bool activePower);
+    void lanzarMisil(qreal x, qreal y, QGraphicsScene* scene);
     void mover();
 //    QGraphicsPixmapItem* getMisil();
 signals:

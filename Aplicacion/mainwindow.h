@@ -139,11 +139,17 @@ private:
     Helicoptero* helicoptero;
 
     void colocarObstaculos(QGraphicsScene* scene, int dificultad);
-    void moverObstaculos(QGraphicsScene* scene);
+    void moverObjetos(QGraphicsScene* scene, int velocidad);
 
     QList <QGraphicsPixmapItem*> obstaculos;
     int carrilAnterior;
     bool ablePower = true;
+
+    QList <QGraphicsTextItem*> letras;
+    QString clave = "LIBERTAD";
+    int indexClave = 0;
+
+    void colocarLetras(QGraphicsScene* scene);
 };
 
 #endif // MAINWINDOW_H

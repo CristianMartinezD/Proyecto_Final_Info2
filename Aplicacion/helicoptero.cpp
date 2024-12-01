@@ -8,10 +8,9 @@ Helicoptero::Helicoptero() {
 
 }
 
-void Helicoptero::lanzarMisil(qreal xFin, qreal yFin, QGraphicsScene *scene, bool activePower){
+void Helicoptero::lanzarMisil(qreal xFin, qreal yFin, QGraphicsScene *scene){
 
     if (activeMisil) return;
-    if (activePower) return;
 
     activeMisil = true;
 
