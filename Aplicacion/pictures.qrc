@@ -1,26 +1,31 @@
 <RCC>
     <qresource prefix="/">
-        <file>imagenes/rueda.png</file>
-        <file>imagenes/Homero.png</file>
-        <file>imagenes/fondo.png</file>
-        <file>imagenes/margey.png</file>
-        <file>imagenes/pared.png</file>
+        <file>imagenes/barney.png</file>
         <file>imagenes/bloque.png</file>
+        <file>imagenes/burns.png</file>
+        <file>imagenes/carro.png</file>
+        <file>imagenes/clancy.png</file>
+        <file>imagenes/fondo.png</file>
+        <file>imagenes/fondocarretera.png</file>
         <file>imagenes/fondoLaberinto.png</file>
-        <file>imagenes/pistolas.png</file>
-        <file>imagenes/policia.png</file>
-        <file>imagenes/GameOver.png</file>
+        <file>imagenes/fondoLaberinto1.png</file>
         <file>imagenes/fuego.png</file>
+        <file>imagenes/GameOver.png</file>
+        <file>imagenes/helicoptero.png</file>
+        <file>imagenes/Homero.png</file>
+        <file>imagenes/jeff.png</file>
         <file>imagenes/mano.png</file>
         <file>imagenes/mano2.png</file>
         <file>imagenes/mano3.png</file>
-        <file>imagenes/NivelSuperado.png</file>
-        <file>imagenes/barney.png</file>
-        <file>imagenes/burns.png</file>
-        <file>imagenes/clancy.png</file>
-        <file>imagenes/jeff.png</file>
+        <file>imagenes/margey.png</file>
         <file>imagenes/milhouse.png</file>
         <file>imagenes/nelson.png</file>
+        <file>imagenes/NivelSuperado.png</file>
+        <file>imagenes/pared.png</file>
+        <file>imagenes/pistolas.png</file>
+        <file>imagenes/policia.png</file>
+        <file>imagenes/rueda.png</file>
         <file>imagenes/seymour.png</file>
+        <file>imagenes/misil.png</file>
     </qresource>
 </RCC>

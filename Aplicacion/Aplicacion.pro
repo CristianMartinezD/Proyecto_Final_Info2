@@ -10,12 +10,14 @@ CONFIG += c++17
 
 SOURCES += \
     enemigo.cpp \
+    helicoptero.cpp \
     main.cpp \
     mainwindow.cpp \
     personaje.cpp
 
 HEADERS += \
     enemigo.h \
+    helicoptero.h \
     mainwindow.h \
     personaje.h
 

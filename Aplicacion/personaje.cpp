@@ -16,6 +16,9 @@ Personaje::Personaje(QString _nombrePersonaje) : columnas(0), ancho(100), alto(1
         setPixmap(pixmap.copy(columnas, 0, ancho, alto).scaled(50, 50, Qt::KeepAspectRatio, Qt::SmoothTransformation));
         vidas = 1;
     }
+    else if (_nombrePersonaje == "HomeroEnCarro"){
+        setPixmap(QPixmap(":/imagenes/carro.png").scaled(150,60, Qt::KeepAspectRatio));
+    }
 }
 
 

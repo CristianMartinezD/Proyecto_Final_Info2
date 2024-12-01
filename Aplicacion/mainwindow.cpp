@@ -8,10 +8,9 @@ MainWindow::MainWindow(QWidget *parent)
 
     Homero = new Personaje("Homero");
 
-    cambiarDeEscena(1);
+    cambiarDeEscena(3);
 
 }
-
 
 
 
@@ -28,6 +27,10 @@ void MainWindow::cambiarDeEscena(int escena)
     }
 
     else if (escena == 2){ /* CONFIGURAMOS TODO PARA LA ESCENA 2 (Laberinto - CRISTIAN) */
+
+        ui->graphicsView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+        ui->graphicsView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
         QImage imagen(":/imagenes/fondoLaberinto.png");
         escenaLaberinto = new QGraphicsScene();
 
@@ -61,9 +64,16 @@ void MainWindow::cambiarDeEscena(int escena)
         volumenDisparo->setVolume(0.8);
         sonidoDisparo->setAudioOutput(volumenDisparo);
     }
+    else if (escena == 3) {
+
+        ui->graphicsView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+        ui->graphicsView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
+        escenaCarrera = new QGraphicsScene();
+        crearCarrera();
+        ui->graphicsView->setScene(escenaCarrera);
+    }
 }
-
-
 
 
 
@@ -217,16 +227,19 @@ void MainWindow::juegoAhorcado(){
             // Si elige ir al nivel 2, hacemos lo siguiente:
             timer->disconnect(); // Desconectamos todas las señales conectadas a este timer.
             timer->stop();
+            if (!removido) {
             /* LIBERAMOS MEMORIA */
-            escenaEscape->removeItem(rect);
-            escenaEscape->removeItem(title); delete title;
-            escenaEscape->removeItem(tiemporestante); delete tiemporestante;
-            escenaEscape->removeItem(palabraParcial); delete palabraParcial;
-            escenaEscape->removeItem(letraInputItem);
-            escenaEscape->removeItem(verificarBotonItem);
-            escenaEscape->removeItem(imagen); delete imagen;
-            delete letraInput;
-            delete verificarBoton;
+                escenaEscape->removeItem(rect);
+                escenaEscape->removeItem(title); delete title;
+                escenaEscape->removeItem(tiemporestante); delete tiemporestante;
+                escenaEscape->removeItem(palabraParcial); delete palabraParcial;
+                escenaEscape->removeItem(letraInputItem);
+                escenaEscape->removeItem(verificarBotonItem);
+                escenaEscape->removeItem(imagen); delete imagen;
+                delete letraInput;
+                delete verificarBoton;
+                removido = !removido;
+            }
         }
     });
     timer->start(1000);
@@ -238,10 +251,19 @@ void MainWindow::juegoAhorcado(){
         if (letra.isEmpty() || letra.length() != 1) {
             return;
         }
+        bool acierto = false;
         for (int i = 0; i < respuesta.length(); ++i) {
             if (respuesta[i] == letra[0]) {
                 espacios[i * 2] = letra[0];
+                acierto = true;
             }
+        }
+        if (!acierto) {
+            QColor originalColor = palabraParcial->defaultTextColor();
+            palabraParcial->setDefaultTextColor(Qt::red);
+            QTimer::singleShot(300,this,[palabraParcial,originalColor](){
+                palabraParcial->setDefaultTextColor(originalColor);
+            });
         }
         palabraParcial->setPlainText(espacios);
         QPair<qreal,qreal> coordenadas = centrar(palabraParcial);
@@ -250,17 +272,19 @@ void MainWindow::juegoAhorcado(){
         if (!espacios.contains('_')){ /* NIVEL SUPERADO */
             timer->disconnect(); // Desconectamos todas las señales conectadas a este timer.
             timer->stop();
+            if (!removido) {
             /* LIBERAMOS MEMORIA */
-            escenaEscape->removeItem(rect);
-            escenaEscape->removeItem(title); delete title;
-            escenaEscape->removeItem(tiemporestante); delete tiemporestante;
-            escenaEscape->removeItem(palabraParcial); delete palabraParcial;
-            escenaEscape->removeItem(letraInputItem);
-            escenaEscape->removeItem(verificarBotonItem);
-            escenaEscape->removeItem(imagen); delete imagen;
-            delete letraInput;
-            delete verificarBoton;
-
+                escenaEscape->removeItem(rect);
+                escenaEscape->removeItem(title); delete title;
+                escenaEscape->removeItem(tiemporestante); delete tiemporestante;
+                escenaEscape->removeItem(palabraParcial); delete palabraParcial;
+                escenaEscape->removeItem(letraInputItem);
+                escenaEscape->removeItem(verificarBotonItem);
+                escenaEscape->removeItem(imagen); delete imagen;
+                delete letraInput;
+                delete verificarBoton;
+                removido = !removido;
+            }
             for (auto item : escenaEscape->items()){
                 if (item->data(0).toString() == "puerta"){
                     escenaEscape->removeItem(item);
@@ -288,6 +312,7 @@ void MainWindow::juegoAhorcado(){
 
 void MainWindow::crearLaberinto()
 {
+    escenaActual = 2;
     int configLab[12][23] = {
         {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
         {1,2,0,0,1,1,1,1,1,1,2,1,1,0,0,0,0,1,0,0,2,0,1},
@@ -367,6 +392,217 @@ void MainWindow::crearLaberinto()
     timer->start(50); // Reloj Base actualizado
 }
 
+
+void MainWindow::colocarObstaculos(QGraphicsScene* scene, int dificultad) {
+
+    srand(time(0));
+    int carril;
+    do {
+        carril = rand() % 3 + 1;
+    }while (carril == carrilAnterior);
+    carrilAnterior = carril;
+    qreal x = 0, y = 0;
+    if (carril == 1) { x = 1450; y = 550; }
+    if (carril == 2) { x = 1400; y = 600; }
+    if (carril == 3) { x = 1350; y= 650; }
+
+    QGraphicsPixmapItem* obstaculo = new QGraphicsPixmapItem();
+    obstaculo->setPixmap(QPixmap(":/imagenes/pared.png").scaled(100,100));
+    obstaculo->setPos(x,y);
+    obstaculo->setRotation(180);
+    QTransform transform;
+    transform.scale(-1, 1);
+    obstaculo->setTransform(transform);
+    scene->addItem(obstaculo);
+    obstaculos.append(obstaculo);
+
+    if (carril == 2) obstaculo->setZValue(4);
+    if (carril == 3) obstaculo->setZValue(5);
+
+    if (dificultad == 2){
+        int carril2;
+        do {
+            carril2 = rand() % 3 + 1;
+        } while(carril2 == carril);
+
+        if (carril2 == 1) { x = 1450; y = 550; }
+        if (carril2 == 2) { x = 1400; y = 600; }
+        if (carril2 == 3) { x = 1350; y= 650; }
+
+        QGraphicsPixmapItem* obstaculo2 = new QGraphicsPixmapItem();
+        obstaculo2->setPixmap(QPixmap(":/imagenes/pared.png").scaled(100,100));
+        obstaculo2->setPos(x,y);
+        obstaculo2->setRotation(180);
+        obstaculo2->setTransform(transform);
+        scene->addItem(obstaculo2);
+        obstaculos.append(obstaculo2);
+        if (carril2 == 2) obstaculo2->setZValue(4);
+        if (carril2 == 3) obstaculo2->setZValue(5);
+    }
+}
+
+void MainWindow::colocarLetras(QGraphicsScene *scene){
+
+    srand(time(0));
+    int carril = rand()%3 + 1;
+
+    qreal x = 0 , y = 0;
+    if (carril == 1) {x = 1450, y = 505; }
+    if (carril == 2) { x = 1400; y = 560; }
+    if (carril == 3) { x = 1350; y = 615; }
+
+    QGraphicsTextItem* letra = new QGraphicsTextItem(QString(clave[indexClave]));
+    QFont font ("Cooper Black",24,QFont::Bold);
+    letra->setFont(font);
+    letra->setDefaultTextColor(Qt::red);
+    letra->setPos(x,y);
+    scene->addItem(letra);
+    qDebug()<<"LETRA AÑADIDA";
+    letras.append(letra);
+
+}
+
+void MainWindow::moverObjetos(QGraphicsScene *scene, int velocidad){
+
+    for (auto obstaculo : obstaculos){
+        obstaculo->setX(obstaculo->x()-velocidad);
+
+        if (obstaculo->x() < - 100) {
+            scene->removeItem(obstaculo);
+            obstaculos.removeOne(obstaculo);
+            delete obstaculo;
+        }
+    }
+
+    for (auto letra : letras ){
+        letra->setX(letra->x()-velocidad);
+        if (letra->x()< -100 ){
+            scene->removeItem(letra);
+            letras.removeOne(letra);
+            delete letra;
+        }
+    }
+}
+
+void MainWindow::crearCarrera(){
+/*
+    for (int i = 0; i<1340;i+=20){
+        for (int j = 0; j<1340;j+=20){
+            escenaCarrera->addEllipse(j,i,1,1)->setZValue(10);
+        }
+    }
+*/
+    escenaActual = 3;
+    escenaCarrera->setSceneRect(0,0,1330,670);
+    QPixmap pixmap (":/imagenes/fondocarretera.png");
+    int move = 0;
+    escenaCarrera->setBackgroundBrush(pixmap.copy(move,0,400,147).scaled(1330,670));
+    QTimer* timer = new QTimer(this);
+    int cont = 0;//Para mover la escena cada 50ms
+    int cont2 = 0;//Para lanzar misiles cada 5s
+    int cont3 = 0; //Para poner obstaculos cada 10s
+    int cont4 = 0; //Para mover helocptero y move obstaculos;
+    int cont5 = 0; //Colocar las letras
+    int velocidadObstaculos = 2;//x-2
+    int velocidadFondo = 6;//30 ms
+    int intervaloObstaculos = 500;
+    int aumentoVelocidad = 0;
+    int numObstaculos = 1;
+    connect(timer,&QTimer::timeout,this, [=]() mutable {
+        cont4++;
+        if (cont4 == 2){
+            helicoptero->mover();
+            moverObjetos(escenaCarrera, velocidadObstaculos);
+            cont4 = 0;
+        }
+
+        for (auto obstaculo : obstaculos){
+            if (Homero->collidesWithItem(obstaculo)){
+                //GAME OVER
+            }
+        }
+
+        for (auto letra : letras) {
+            if (Homero->collidesWithItem(letra)){
+                indexClave++;
+                letras.removeOne(letra);
+                escenaCarrera->removeItem(letra);
+                delete letra;
+
+                if (indexClave == clave.size()){
+                    qDebug()<<"GANO";
+                    /*
+                        PASO EL NIVEL
+                    */
+                }
+            }
+        }
+
+        cont++;
+        cont2++;
+        cont3++;
+        aumentoVelocidad++;
+
+        if (cont == velocidadFondo || velocidadFondo == 0){
+            move++;
+            escenaCarrera->setBackgroundBrush(pixmap.copy(move,0,400,147).scaled(1330,670));
+            if (move == 800) move = 0;
+            cont = 0;
+        }
+
+        if(cont2 == 1040) {
+            helicoptero->lanzarMisil(Homero->x(),Homero->y(),escenaCarrera);
+            cont2 = 0;
+        }
+
+        if (cont3 >= intervaloObstaculos){
+            colocarObstaculos(escenaCarrera,numObstaculos);
+            cont3 = 0;
+        }
+
+        cont5++;
+        if (cont5 == 1800){
+            if (indexClave < clave.size()){
+                colocarLetras(escenaCarrera);
+            }
+            cont5 = 0;
+        }
+
+        if (aumentoVelocidad == 2400){
+            velocidadObstaculos++;
+            if (velocidadFondo > 1) velocidadFondo--;
+            intervaloObstaculos = std::max(200, intervaloObstaculos-50);
+            if (numObstaculos < 2) numObstaculos++;
+            aumentoVelocidad = 0;
+        }
+    });
+    timer->start(5);
+
+    helicoptero = new Helicoptero ();
+    helicoptero->setPos(20,40);
+    escenaCarrera->addItem(helicoptero);
+
+    Homero = new Personaje("HomeroEnCarro");
+    Homero->setPos(470,555);
+    escenaCarrera->addItem(Homero);
+
+    connect(helicoptero,&Helicoptero::posExplosion, this, [=] (int y) mutable {
+        if (y>430 && y < 475 && Homero->y()==500 && Homero->x() == 470){//Explosion en carril 1
+            /*
+                GAME OVER
+            */
+        }else if (y>485 && y<535 && Homero->y() == 555  && Homero->x() == 470){ //Explosion en carril 2
+            /*
+                GAME OVER
+            */
+        }else if (y>550 && y < 595 && Homero->y() == 610  && Homero->x() == 470){ //Explosion en carril 3
+            /*
+                GAME OVER
+            */
+        }
+    });
+
+}
 
 
 
@@ -459,59 +695,103 @@ void MainWindow::controlDeTemporizadores()
 // MÉTODO QUE DETECTA CUANDO SE PRECIONAN TECLAS //
 void MainWindow::keyPressEvent(QKeyEvent *e)
 {
-    // Guardamos la posición actual del personaje antes de moverlo
-    qreal posXAnterior = Homero->x();
-    qreal posYAnterior = Homero->y();
+    if (escenaActual == 1) return;
 
-    switch (e->key()) {
-        case Qt::Key_D: {  // Mover a la derecha
-            Homero->ActualizarImagen(0);
-            Homero->setPos(Homero->x() + 10, Homero->y());  // Intentar mover a la derecha
-            if (tocarPared()) {  // Si colisiona, restauramos a la posición anterior
-                Homero->setPos(posXAnterior, posYAnterior);
+    if (escenaActual == 2) {
+        // Guardamos la posición actual del personaje antes de moverlo
+        qreal posXAnterior = Homero->x();
+        qreal posYAnterior = Homero->y();
+
+        switch (e->key()) {
+            case Qt::Key_D: {  // Mover a la derecha
+                Homero->ActualizarImagen(0);
+                Homero->setPos(Homero->x() + 10, Homero->y());  // Intentar mover a la derecha
+                if (tocarPared()) {  // Si colisiona, restauramos a la posición anterior
+                    Homero->setPos(posXAnterior, posYAnterior);
+                }
+                break;
             }
-            break;
+            case Qt::Key_A: {  // Mover a la izquierda
+                Homero->ActualizarImagen(100);
+                Homero->setPos(Homero->x() - 10, Homero->y());  // Intentar mover a la izquierda
+                if (tocarPared()) {
+                    Homero->setPos(posXAnterior, posYAnterior);
+                }
+                break;
+            }
+            case Qt::Key_W: {  // Mover hacia arriba
+                Homero->ActualizarImagen(300);
+                Homero->setPos(Homero->x(), Homero->y() - 10);  // Intentar mover hacia arriba
+                if (tocarPared()) {
+                    Homero->setPos(posXAnterior, posYAnterior);
+                }
+                break;
+            }
+            case Qt::Key_S: {  // Mover hacia abajo
+                Homero->ActualizarImagen(200);
+                Homero->setPos(Homero->x(), Homero->y() + 10);  // Intentar mover hacia abajo
+                if (tocarPared()) {
+                    Homero->setPos(posXAnterior, posYAnterior);
+                }
+                break;
+            }
         }
-        case Qt::Key_A: {  // Mover a la izquierda
-            Homero->ActualizarImagen(100);
-            Homero->setPos(Homero->x() - 10, Homero->y());  // Intentar mover a la izquierda
-            if (tocarPared()) {
-                Homero->setPos(posXAnterior, posYAnterior);
+
+        if (Homero->x() <= 80 && Homero->y() >= 11*60-60 && claveObtenida == 8){
+            if (escenaLaberinto->items().contains(puerta)){
+                escenaLaberinto->removeItem(puerta);
+                // Eliminar de la lista
+                Bloques.removeOne(puerta);
+                // Liberar la memoria de la puerta.
+                delete puerta;
+                puerta = nullptr;
             }
-            break;
-        }
-        case Qt::Key_W: {  // Mover hacia arriba
-            Homero->ActualizarImagen(300);
-            Homero->setPos(Homero->x(), Homero->y() - 10);  // Intentar mover hacia arriba
-            if (tocarPared()) {
-                Homero->setPos(posXAnterior, posYAnterior);
+            static bool anunciarVictoria = true;
+            if (Homero->x() <= 50 && anunciarVictoria){
+                anunciarVictoria = false;
+                Homero->setPos(Homero->x()-65, Homero->y());
+                anuncio("Victoria"); /* LLAMAR FUNCIÓN QUE ANUNCIA HABER SUPERADO EL NIVEL */
             }
-            break;
-        }
-        case Qt::Key_Z: {  // Mover hacia abajo
-            Homero->ActualizarImagen(200);
-            Homero->setPos(Homero->x(), Homero->y() + 10);  // Intentar mover hacia abajo
-            if (tocarPared()) {
-                Homero->setPos(posXAnterior, posYAnterior);
-            }
-            break;
         }
     }
+    else if (escenaActual == 3){
 
-    if (Homero->x() <= 80 && Homero->y() >= 11*60-60 && claveObtenida == 8){
-        if (escenaLaberinto->items().contains(puerta)){
-            escenaLaberinto->removeItem(puerta);
-            // Eliminar de la lista
-            Bloques.removeOne(puerta);
-            // Liberar la memoria de la puerta.
-            delete puerta;
-            puerta = nullptr;
-        }
-        static bool anunciarVictoria = true;
-        if (Homero->x() <= 50 && anunciarVictoria){
-            anunciarVictoria = false;
-            Homero->setPos(Homero->x()-65, Homero->y());
-            anuncio("Victoria"); /* LLAMAR FUNCIÓN QUE ANUNCIA HABER SUPERADO EL NIVEL */
+        int posMax = 610;
+        int posMin = 500;
+
+        switch (e->key()){
+
+            case Qt::Key_W: {
+
+                if (Homero->y()-55 < posMin) return;
+                Homero->setY(Homero->y()-55);
+                break;
+            }
+
+            case Qt::Key_S: {
+                if (Homero->y()+55 > posMax) return;
+                Homero->setY(Homero->y()+55);
+                break;
+            }
+
+            case Qt::Key_Space: {
+                if (Homero->x() == 570) return;
+                if (!ablePower) return;
+                Homero->setX(Homero->x()+100);
+                QEventLoop loop;
+                QTimer::singleShot(600, &loop, &QEventLoop::quit);
+                loop.exec();
+                Homero->setX(Homero->x()-100);
+                ablePower = false;
+                QTimer* timer = new QTimer();
+                QObject::connect(timer, &QTimer::timeout, this, [=]() mutable {
+                    ablePower = true;
+                    timer->stop();
+                });
+                timer->start(10000);
+
+                break;
+            }
         }
     }
 }
@@ -935,10 +1215,6 @@ void MainWindow::llamasDeFuego()
 
 }
 
-
-
-
-
 void MainWindow::iniciarResortes(bool primeraVez)
 {
     if (primeraVez){
@@ -993,7 +1269,6 @@ void MainWindow::iniciarResortes(bool primeraVez)
         moverConResorte(mano3, mano3->x(), mano3->y(), params3[0], params3[1], params3[2]);
     }
 }
-
 
 
 void MainWindow::moverConResorte(QGraphicsPixmapItem *mano, double x, double y, double A, double beta, double omega)

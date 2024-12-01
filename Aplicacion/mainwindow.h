@@ -33,10 +33,13 @@
 #include <QString>
 #include <QRandomGenerator>
 #include <QPair>
+#include <cstdlib>
+#include <ctime>
 /*##################################*/
 
 #include "personaje.h"
 #include "enemigo.h"
+#include "helicoptero.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -54,6 +57,7 @@ public:
     bool tocarPared();     // Cristian
     void moverRuedas();    // Cristian
     void cambiarDeEscena(int escena); // Cristian
+    void juegoAhorcado(); // Juan
     void dispararBola(QString policia);
     void moverBalas(QGraphicsPixmapItem *policia, QList<QGraphicsEllipseItem *> &balas);
     void configurarElementosDeLaEscenaLaberinto();
@@ -70,15 +74,13 @@ public:
 
 signals:
     void senalParaMoverElResorte(QGraphicsPixmapItem* mano); // Señal parametrizada con la mano que debe moverse
-    void llamarJuegoAhorcado();
+    //void llamarJuegoAhorcado();
 
 protected:
     void keyPressEvent(QKeyEvent *e);
 
 public slots:
     void controlDeTemporizadores(); // Cristian
-
-    void juegoAhorcado(); // Juan
 
 private:
     Ui::MainWindow *ui;
@@ -126,10 +128,28 @@ private:
 
 
     /* JUAN LUIS */
+
+    bool removido = false;
+
     QGraphicsScene *escenaEscape;
     void crearEscape();
 
+    QGraphicsScene *escenaCarrera;
+    void crearCarrera();
+    Helicoptero* helicoptero;
+
+    void colocarObstaculos(QGraphicsScene* scene, int dificultad);
+    void moverObjetos(QGraphicsScene* scene, int velocidad);
+
+    QList <QGraphicsPixmapItem*> obstaculos;
+    int carrilAnterior;
+    bool ablePower = true;
+
+    QList <QGraphicsTextItem*> letras;
+    QString clave = "LIBERTAD";
+    int indexClave = 0;
+
+    void colocarLetras(QGraphicsScene* scene);
 };
 
 #endif // MAINWINDOW_H
-
