@@ -8,7 +8,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     //Homero = new Personaje("Homero");
 
-    cambiarDeEscena(3);
+    cambiarDeEscena(0);
 
 }
 
@@ -85,9 +85,6 @@ void MainWindow::cambiarDeEscena(int escena)
             firstpath = false;
         }
         rect = new QGraphicsPathItem();
-        //path = new QPainterPath();
-        //path.addRoundedRect(0,0,1330,670,0,0);
-        //rect = new QGraphicsPathItem();
 
         crearEscape();
 
@@ -182,7 +179,6 @@ void MainWindow::crearEscape() {
     QGraphicsProxyWidget* proxyPausaBoton = escenaEscape->addWidget(pausaBoton);
     proxyPausaBoton->setPos(1220, 30);
 
-    //QPainterPath path;
     connect(pausaBoton,&QPushButton::clicked, this, [=] (){
         if (!able1) return;
 
@@ -218,10 +214,6 @@ void MainWindow::crearEscape() {
 
     connect(salirBoton,&QPushButton::clicked, this, [=] (){
         timer->stop();
-        /*Liberar
-         *
-         *
-         *  memoria*/
         able1 = true; able2 = false; able3 = false; able4 = false;
         pausado = false;
         cambiarDeEscena(0);
@@ -243,6 +235,17 @@ void MainWindow::continuar(){
 
 }
 
+
+QPair<qreal, qreal> centrar(QGraphicsTextItem* texto){
+
+    QRectF areaCentro(380,350,265,40);
+    QRectF textoRect = texto->boundingRect();
+    qreal xCentrado = areaCentro.x() + (areaCentro.width() - textoRect.width()) / 2;
+    qreal yCentrado = areaCentro.y() + (areaCentro.height() - textoRect.height()) / 2;
+    return QPair<qreal, qreal> (xCentrado, yCentrado);
+
+}
+
 QPair<QString, QPixmap> elegirParAleatorio(const QMap<QString, QPixmap>& personajes) {
     // Convertir las claves a una lista para acceder a ellas por índice
     QList<QString> claves = personajes.keys();
@@ -259,18 +262,6 @@ QPair<QString, QPixmap> elegirParAleatorio(const QMap<QString, QPixmap>& persona
 
     return QPair<QString, QPixmap>(claveAleatoria, valorAleatorio);
 }
-
-QPair<qreal, qreal> centrar(QGraphicsTextItem* texto){
-
-    QRectF areaCentro(380,350,265,40);
-    QRectF textoRect = texto->boundingRect();
-    qreal xCentrado = areaCentro.x() + (areaCentro.width() - textoRect.width()) / 2;
-    qreal yCentrado = areaCentro.y() + (areaCentro.height() - textoRect.height()) / 2;
-    return QPair<qreal, qreal> (xCentrado, yCentrado);
-
-}
-
-
 
 void MainWindow::juegoAhorcado(){
 
@@ -430,6 +421,8 @@ void MainWindow::juegoAhorcado(){
                 Homero->setPos(Homero->x()+30,Homero->y());
                 if (Homero->x()>1330){
                     timer2->stop();
+                    escenaEscape->removeItem(Homero);
+                    delete Homero;
                     cambiarDeEscena(2);
                 }
             });
@@ -547,6 +540,11 @@ void MainWindow::crearLaberinto()
 }
 
 
+
+
+
+
+
 void MainWindow::colocarObstaculos(QGraphicsScene* scene, int dificultad) {
 
     srand(time(0));
@@ -594,6 +592,9 @@ void MainWindow::colocarObstaculos(QGraphicsScene* scene, int dificultad) {
         if (carril2 == 3) obstaculo2->setZValue(5);
     }
 }
+
+
+
 
 void MainWindow::colocarLetras(QGraphicsScene *scene){
 
@@ -662,7 +663,9 @@ void MainWindow::crearCarrera(){
     int intervaloObstaculos = 500;
     int aumentoVelocidad = 0;
     int numObstaculos = 1;
+
     connect(timer,&QTimer::timeout,this, [=]() mutable {
+
         cont4++;
         if (cont4 == 2){
             helicoptero->mover();
@@ -737,7 +740,6 @@ void MainWindow::crearCarrera(){
     helicoptero->setPos(20,40);
     escenaCarrera->addItem(helicoptero);
 
-    //Homero = new Personaje("HomeroEnCarro");
     Homero->setPos(470,555);
     escenaCarrera->addItem(Homero);
 
@@ -786,6 +788,10 @@ void MainWindow::recuadroGameOver(){
 
     connect(reiniciarButton, &QPushButton::clicked, this, [=] () mutable {
         // MOVER LAS VARIABLES AL .H
+        escenaCarrera->removeItem(proxyReiniciar);
+        escenaCarrera->removeItem(proxySalir);
+        escenaCarrera->removeItem(fondo);
+
     });
     connect(salirButton, &QPushButton::clicked, this, [=] () mutable {
         /*
@@ -1146,7 +1152,7 @@ void MainWindow::moverBalas(QGraphicsPixmapItem *policia, QList<QGraphicsEllipse
             textVidas->setPlainText("Vidas " + QString::number(Homero->getVidas()));
             if (Homero->getVidas() <= 0){
                 /* FUNCION QUE UNUNCIA LA PERDIDA DE LA PARTIDA! */
-                anuncio("Derrota");
+                anuncio("DERROTA");
             }
             eliminarBala = true;
         }
@@ -1352,6 +1358,7 @@ void MainWindow::reiniciarVariables(QString motivoReinicio)
 
         ListaLetras.clear();
         listaDePuntos.clear();
+
         escenaLaberinto->removeItem(mano1);
         delete mano1;
         escenaLaberinto->removeItem(mano2);
@@ -1364,10 +1371,14 @@ void MainWindow::reiniciarVariables(QString motivoReinicio)
         delete Policia1;
         escenaLaberinto->removeItem(Policia2);
         delete Policia2;
-        escenaLaberinto->clear();
-        delete escenaLaberinto;
-        escenaLaberinto = nullptr;
-        //cambiarDeEscena(3);
+        escenaLaberinto->removeItem(Homero);
+        delete Homero;
+
+        //escenaLaberinto->clear();
+        //delete Homero;
+        //delete escenaLaberinto;
+        //escenaLaberinto = nullptr;
+        cambiarDeEscena(3);
     }
 
 }
